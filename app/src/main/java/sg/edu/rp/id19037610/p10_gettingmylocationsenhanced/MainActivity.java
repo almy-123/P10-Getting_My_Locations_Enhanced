@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     GoogleMap map;
     Button btnStartDetector, btnStopDetector, btnCheckRecords;
     FusedLocationProviderClient client;
+    boolean isBound = false;
 
     MyService.LocationGetter locationGetter;
 
@@ -54,11 +55,12 @@ public class MainActivity extends AppCompatActivity {
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             locationGetter = (MyService.LocationGetter) iBinder;
             locationGetter.getLocation();
+            isBound = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-
+            isBound = false;
         }
     };
 
@@ -100,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
         btnStartDetector.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                isBound = true;
                 Intent bindIntent = new Intent(MainActivity.this, MyService.class);
                 bindService(bindIntent, connection, BIND_AUTO_CREATE);
             }
@@ -108,7 +111,10 @@ public class MainActivity extends AppCompatActivity {
         btnStopDetector.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                unbindService(connection);
+                if (isBound) {
+                    unbindService(connection);
+                    isBound = false;
+                }
             }
         });
 
